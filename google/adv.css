@@ -1,0 +1,49 @@
+.header {
+    position:absolute;
+    top:20px;
+    right:10px;
+    padding: 10px;
+}
+a {
+    color:black;
+    text-decoration: none;
+}
+
+.inps {
+    font-family: arial,sans-serif;
+    font-weight:normal;
+    color:#333;
+}
+
+.button {
+    background-color:#4285F4;
+    font-family: arial;
+    font-size: 16px;
+    font-weight: bold;
+    color:#fff;
+    display:block;
+    width:350px;
+    margin-left: auto;
+    margin-right: auto;
+    border:none;
+    cursor:pointer;
+}
+
+input {
+  width: 400px;
+  height:30px;
+}
+
+img{
+    width:150px;
+    height:auto;
+}
+
+form {
+    margin-left:10px;
+}
+
+input[type="submit"]:hover {
+    box-shadow: 0 1px 1px;
+    border: 1px solid #dadce0;
+}
