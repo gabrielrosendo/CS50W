@@ -1,0 +1,17 @@
+{% extends "encyclopedia/layout.html" %}
+
+{% block title %}
+    {{ entryTitle | safe }}
+{% endblock %}
+
+{% block body %}
+<form method="post">
+    {% csrf_token %}
+    <h3>{{entryTitle}}</h3>
+
+    <h3>Description of the page</h3>
+    <textarea name="description">{{entry}}</textarea>
+
+    <button type="submit">Save</button>
+</form>
+{% endblock %}
