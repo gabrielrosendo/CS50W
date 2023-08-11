@@ -1,0 +1,14 @@
+body {
+    padding: 10px;
+}
+
+.listing{
+    max-width: fit-content;
+}
+.listings {
+    max-width: 90%;
+}
+img {
+    max-width: 20%;   /* Set the maximum width */
+    max-height: auto;  /* Set the maximum height */
+}
