@@ -1,15 +1,7 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-    <h2>Active Listings</h2>
-    <h3>Shop by Category: </h3>
-    <div class="categories">
-    {% for category_key, category_name in categories %}
-        <a href="{% url 'category' category_name %}">
-            <h4>{{category_name}}</h4>
-        </a>
-    {% endfor %}
-    </div>
+    <h2>Category: {{category}}</h2>
     <div class="listings">
         {% for listing in listings %}
             <a href="{% url 'listing' listing.title %}">
@@ -21,5 +13,4 @@
             </a>
         {% endfor %}
     </div>
-    <a href="{% url 'create' %}"><h3>Create listing</h3></a>
 {% endblock %}

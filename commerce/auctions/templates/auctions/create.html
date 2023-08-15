@@ -2,9 +2,15 @@
 
 {% block body %}
 <h1>Add Listing:</h1>
+{% if user.is_authenticated %}
+Signed in as <strong>{{ user.username }}</strong>.
 <form action="{% url 'create' %}" method="post">
     {% csrf_token %}
     {{ form }}
     <input type="submit">
 </form>
+{% else %}
+Please sign in to add a listing.
+{% endif %}
+
 {% endblock %}

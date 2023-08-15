@@ -1,23 +1,33 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django import forms
 
 from .models import Listing, User
 
+CATEGORY_CHOICES = [
+        ('electronics', 'Electronics'),
+        ('clothing', 'Clothing'),
+        ('furniture', 'Furniture'),
+        ('home', 'Home'),
+        ('other', 'Other')
+    ]
 
 class NewListingForm(forms.Form):
     title = forms.CharField(label="Title")
     description = forms.CharField(label="Description")
     price = forms.CharField(label="Starting price")
     image = forms.URLField(label = "Image URL")
+    category = forms.ChoiceField(label="Category", choices=CATEGORY_CHOICES)
+
     
 def index(request):
     listings = Listing.objects.all()
     return render(request, "auctions/index.html", {
-                  "listings" : listings
+                  "listings" : listings,
+                  "categories": CATEGORY_CHOICES
                 }
             )
 
@@ -57,7 +67,8 @@ def create(request):
                     description=form.cleaned_data['description'],
                     image_url=form.cleaned_data['image'],
                     current_price=form.cleaned_data['price'],
-                    seller=request.user 
+                    seller=request.user,
+                    category =form.cleaned_data['category']
                 )    
                 print(new_listing)
                 new_listing.save()
@@ -99,8 +110,20 @@ def register(request):
         return render(request, "auctions/register.html")
 
 def listing(request, title):
+    if request.method == "POST":
+        #check if bid is higher than current bid -> update bid
+        pass
+    listing = get_object_or_404(Listing, title=title)
     #retrieve info from db and pass it to front end
     return render(request, "auctions/listing.html", {
-                  "listing" : title
+                  "listing" : listing
                 }
             )
+
+def category(request, name):
+    listings = Listing.objects.filter(category=name.capitalize())
+    return render(request, "auctions/category.html", {
+            "listings": listings,
+            "category": name
+        }
+    )
