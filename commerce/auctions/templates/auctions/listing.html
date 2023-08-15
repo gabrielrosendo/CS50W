@@ -2,6 +2,23 @@
 
 {% block body %}
     <h2>Listing Page</h2>
-    {{listing}}
+    <div class="listing-page">
+        <img src="{{ listing.image_url }}">     
+        <h3>{{ listing.title }}</h3>
+        <h5> {{ listing.description }}</h5>
+        <h3>$ {{ listing.current_price }}</h3>
+        {% if user.is_authenticated %}
+        <h3>Place a bid:</h3>
+            <form action="{% url 'listing' listing.title %}" method="post">
+                <input type="number" name="bid">
+                <input type="submit">
+            </form>
+        {% else %}
+            Not signed in.
+        {% endif %}
+        <h3>Details</h3>
+        <li>Sold by {{ listing.seller }}</li>
+        <li>Category: {{ listing.category }}</li>
 
+    </div>
 {% endblock %}

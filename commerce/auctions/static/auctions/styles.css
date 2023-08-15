@@ -2,13 +2,49 @@ body {
     padding: 10px;
 }
 
-.listing{
-    max-width: fit-content;
-}
 .listings {
-    max-width: 90%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px; 
 }
-img {
-    max-width: 20%;   /* Set the maximum width */
-    max-height: auto;  /* Set the maximum height */
+
+.listing {
+    max-width: 300px; 
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: center;
 }
+
+.listing img {
+    max-width: 100%;
+}
+
+.listing-page img{
+    max-width: 30%;   
+}
+
+form {
+    max-width: 400px;
+    padding: 20px;
+}
+
+
+label {
+    font-weight: bold;
+    font-size: 19px;
+}
+
+input[type="text"],
+select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    font-size: 16px;
+}
+
+

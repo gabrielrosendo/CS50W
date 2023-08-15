@@ -11,4 +11,6 @@ class Listing(models.Model):
     image_url = models.URLField()
     current_price = models.FloatField()
     seller = models.ForeignKey(User, on_delete=models.CASCADE)
+    category = models.CharField(max_length=64)
+
 
