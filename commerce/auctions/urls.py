@@ -10,5 +10,6 @@ urlpatterns = [
     path("create", views.create, name = "create"),
     path("listing/<str:title>/", views.listing, name = "listing"),
     path("<str:name>/", views.category, name = "category"),
-    
+    path("watchlist", views.watchlist, name = "watchlist"),
+    path('close_listing/<str:title>/', views.close_listing, name='close_listing'),
 ]

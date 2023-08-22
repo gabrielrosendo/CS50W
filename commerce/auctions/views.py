@@ -1,19 +1,20 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django import forms
 
-from .models import Listing, User
+from .models import Listing, User, Comment, Bid
 
 CATEGORY_CHOICES = [
-        ('electronics', 'Electronics'),
-        ('clothing', 'Clothing'),
-        ('furniture', 'Furniture'),
-        ('home', 'Home'),
-        ('other', 'Other')
-    ]
+    ('Electronics', 'Electronics'),
+    ('Clothing', 'Clothing'),
+    ('Furniture', 'Furniture'),
+    ('Home', 'Home'),
+    ('Other', 'Other')
+]
+
 
 class NewListingForm(forms.Form):
     title = forms.CharField(label="Title")
@@ -24,7 +25,7 @@ class NewListingForm(forms.Form):
 
     
 def index(request):
-    listings = Listing.objects.all()
+    listings = Listing.objects.filter(active=True)
     return render(request, "auctions/index.html", {
                   "listings" : listings,
                   "categories": CATEGORY_CHOICES
@@ -58,7 +59,6 @@ def logout_view(request):
 
 def create(request):
     if request.method == "POST":
-        ## create forms and add it to db
         form = NewListingForm(request.POST)
         if form.is_valid():
             try:
@@ -70,13 +70,12 @@ def create(request):
                     seller=request.user,
                     category =form.cleaned_data['category']
                 )    
-                print(new_listing)
                 new_listing.save()
                 return HttpResponseRedirect(reverse('index'))
             except Exception as e:
                 return HttpResponse("Error")
         else:
-            print(form.errors)  # Print the form validation errors
+            return HttpResponse(form.errors)  
 
     return render(request, "auctions/create.html", {
         "form": NewListingForm()
@@ -110,15 +109,87 @@ def register(request):
         return render(request, "auctions/register.html")
 
 def listing(request, title):
-    if request.method == "POST":
-        #check if bid is higher than current bid -> update bid
-        pass
     listing = get_object_or_404(Listing, title=title)
+    comments = Comment.objects.filter(listing=listing.pk)
+    if listing.active is False:
+        final_buyer = get_object_or_404(Bid, listing=listing)
+        if final_buyer.buyer.id == request.user.id:
+                message = "You have the final bid and this listing is closed"
+                return render(request, "auctions/listing.html", {
+                    "listing" : listing,
+                    "message": message,
+                    "comments": comments,
+                    "message_color" : "message-green"
+                })
+    if request.user == listing.seller:
+            return render(request, "auctions/listing.html", {
+                    "listing" : listing,
+                    "comments": comments,
+                    "seller" : True
+                })
+    if request.method == "POST":
+        if "bid" in request.POST:
+            bid_str = request.POST["bid"]
+            if bid_str and bid_str.strip():
+                try:
+                    bid = float(bid_str)
+                    cur_bid = Bid.objects.get(listing=listing)
+                    if bid > cur_bid.value:
+                        cur_bid.value = bid
+                        cur_bid.buyer = request.user
+                        listing.current_price = cur_bid.value
+                        listing.save()
+                        cur_bid.save()
+                    else:
+                        return render(request, "auctions/listing.html", {
+                            "listing" : listing,
+                            "comments": comments,
+                            "message" : "Your bid has to be higher than the current bid. Please try again.",
+                            "message_color" : "message-red"
+                        })
+                except Bid.DoesNotExist:
+                    cur_value = listing.current_price
+                    if bid>=cur_value:
+                        new_bid = Bid(listing=listing, value=bid, buyer = request.user)
+                        listing.current_price = bid
+                        listing.save()
+                        new_bid.save()
+                    else:
+                        return render(request, "auctions/listing.html", {
+                            "listing" : listing,
+                            "comments": comments,
+                            "message" : "Your bid has to be higher than the current bid. Please try again.",
+                            "message_color" : "message-red"
+                        })
+            else:
+                return render(request, "auctions/listing.html", {
+                "listing": listing,
+                "comments": comments,
+                "message": "Bid value cannot be empty.",
+                "message_color" : "message-red"
+                })
+        elif "comment" in request.POST:
+            new_comment = Comment(
+                text = request.POST["comment"],
+                listing = listing,
+                user = request.user
+                )
+            new_comment.save()
+
+
     #retrieve info from db and pass it to front end
     return render(request, "auctions/listing.html", {
-                  "listing" : listing
+                  "listing" : listing,
+                  "comments": comments
                 }
             )
+
+def close_listing(request, title):
+    listing = get_object_or_404(Listing, title=title)
+    listing.active = False
+    listing.save()
+    return redirect('listing', title=title)
+
 
 def category(request, name):
     listings = Listing.objects.filter(category=name.capitalize())
@@ -127,3 +198,11 @@ def category(request, name):
             "category": name
         }
     )
+
+def watchlist(request):
+    if request.method == "POST":
+        listing_id = request.POST["listing_id"]
+        listing = get_object_or_404(Listing, id=listing_id)
+        request.user.watchlist.add(listing)
+    listings = request.user.watchlist.all()  
+    return render(request, "auctions/watchlist.html", {"listings": listings})
